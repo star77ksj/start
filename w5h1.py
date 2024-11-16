@@ -3,52 +3,60 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGener
 from langchain_core import prompts
 import google.generativeai as genai
 
-# 사용자로부터 API 키 입력받기
-api_key = st.text_input('Enter your Gemini API Key:', type='password')
+# API 키 입력받기
+GOOGLE_API_KEY = st.text_input('Google API 키를 입력하세요:', type='password')
+if GOOGLE_API_KEY:
+    genai.configure(api_key=GOOGLE_API_KEY)
 
-# 6하 원칙 입력받기
-who = st.text_input('Who:')
-what = st.text_input('What:')
-when = st.text_input('When:')
-where = st.text_input('Where:')
-why = st.text_input('Why:')
-how = st.text_input('How:')
+# 스트림릿 앱 제목
+st.title('5W1H 기반 글쓰기 도우미')
 
-# 생성 버튼
-if st.button('Generate'):
-    try:
-        if not api_key:
-            st.error('API 키를 입력해주세요.')
-            st.stop()
-            
-        # Gemini 모델 설정
-        llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash-002", google_api_key=api_key)
-        
-        # 입력값 검증
-        if not (who and what and when and where and why and how):
-            st.warning('모든 항목을 입력해주세요.')
-            st.stop()
-            
+# 5W1H 입력 받기
+who = st.text_input('누가 (Who):', '')
+what = st.text_input('무엇을 (What):', '')
+when = st.text_input('언제 (When):', '')
+where = st.text_input('어디서 (Where):', '')
+why = st.text_input('왜 (Why):', '')
+how = st.text_input('어떻게 (How):', '')
+
+# 글 생성 버튼
+if st.button('글 생성하기'):
+    if who and what and when and where and why and how:
         # 프롬프트 템플릿 생성
-        template = """Who: {who}
-What: {what}
-When: {when}
-Where: {where}
-Why: {why}
-How: {how}"""
-
+        template = """
+        다음 정보를 바탕으로 논리적이고 자연스러운 글을 작성해주세요:
+        
+        누가: {who}
+        무엇을: {what}
+        언제: {when}
+        어디서: {where}
+        왜: {why}
+        어떻게: {how}
+        """
+        
         prompt = prompts.PromptTemplate(
-            template=template,
-            input_variables=["who", "what", "when", "where", "why", "how"]
+            input_variables=["who", "what", "when", "where", "why", "how"],
+            template=template
         )
         
-        # 프롬프트 생성 및 결과 얻기
-        final_prompt = prompt.format(who=who, what=what, when=when, where=where, why=why, how=how)
-        result = llm.invoke(final_prompt)
+        # LLM 모델 설정
+        llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash-002", temperature=1)
+        
+        # 최종 프롬프트 생성
+        final_prompt = prompt.format(
+            who=who,
+            what=what,
+            when=when,
+            where=where,
+            why=why,
+            how=how
+        )
+        
+        # 글 생성
+        response = llm.invoke(final_prompt)
         
         # 결과 출력
-        st.write('생성된 텍스트:')
-        st.write(result.content)
-        
-    except Exception as e:
-        st.error(f'오류가 발생했습니다: {str(e)}')
+        st.subheader('생성된 글:')
+        st.write(response.content)
+    else:
+        st.warning('모든 항목을 입력해주세요.')
