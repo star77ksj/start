@@ -1,7 +1,7 @@
 import streamlit as st
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_core import prompts
-
+import google.generativeai as genai
 
 # 사용자로부터 API 키 입력받기
 api_key = st.text_input('Enter your Gemini API Key:', type='password')
