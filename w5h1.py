@@ -1,7 +1,7 @@
 import streamlit as st
-from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
-from langchain_core import prompts
 import google.generativeai as genai
+from langchain.prompts import PromptTemplate
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 # API 키 입력받기
 GOOGLE_API_KEY = st.text_input('Google API 키를 입력하세요:', type='password')
@@ -34,7 +34,7 @@ if st.button('글 생성하기'):
         어떻게: {how}
         """
         
-        prompt = prompts.PromptTemplate(
+        prompt = PromptTemplate(
             input_variables=["who", "what", "when", "where", "why", "how"],
             template=template
         )
